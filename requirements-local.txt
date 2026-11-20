@@ -1,0 +1,6 @@
+# Extra libraries for the Airflow image. Versions = the ones Airflow 2.10.4 itself is tested with
+# (pandas, numpy and psycopg2 are normally already in the image; pinning the same version changes nothing)
+duckdb==1.1.3
+pandas==2.1.4
+numpy==1.26.4
+psycopg2-binary==2.9.10

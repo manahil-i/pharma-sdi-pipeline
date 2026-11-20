@@ -1,0 +1,11 @@
+# Grafana loads every dashboard JSON file found in /etc/grafana/dashboards into the folder "SDI Pipeline".
+apiVersion: 1
+providers:
+  - name: sdi-dashboards
+    folder: SDI Pipeline
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards

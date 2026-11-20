@@ -1,0 +1,13 @@
+# data and generated files are NOT pushed to GitHub (too big)
+data/landing/*
+data/archive/*
+data/failed/*
+data/generated/*
+data/source/*
+mart/*
+logs/*
+!**/.gitkeep
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
