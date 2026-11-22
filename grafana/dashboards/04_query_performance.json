@@ -1,74 +1,69 @@
 {
-  "uid": "sdi-query",
-  "title": "SDI 4 - Query Performance",
-  "description": "Every query is logged: the 6 pipeline queries (raw vs summary) after each load, and every query typed live with mart_sql",
-  "tags": [
-    "sdi",
-    "milestone1"
-  ],
-  "timezone": "browser",
-  "schemaVersion": 39,
-  "version": 1,
-  "editable": true,
-  "refresh": "10s",
-  "time": {
-    "from": "now-7d",
-    "to": "now"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
+  "description": "Every query is logged: the 6 pipeline queries (raw vs summary) after each load, and every query typed live with mart_sql",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 4,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "**Query layer** \u2013 every query is timed and logged. **Live** = typed in the terminal (`mart_sql shell`), shown within 10 s. **Pipeline** = the 6 dashboard queries run after every load in two versions: **raw** (joins the big fact tables) and **summary** (reads a small pre-aggregated table). Speed-up = raw time \u00f7 summary time."
-      }
-    },
-    {
-      "id": 2,
-      "type": "stat",
-      "title": "Queries executed today",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 3
+        "y": 0
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE started_at >= date_trunc('day', now())"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          }
-        },
-        "overrides": []
-      },
+      "id": 2,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -76,50 +71,69 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE started_at >= date_trunc('day', now())",
+          "refId": "A"
+        }
+      ],
+      "title": "Queries executed today",
+      "type": "stat"
     },
     {
-      "id": 3,
-      "type": "stat",
-      "title": "Live queries today",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 3
+        "y": 0
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE variant = 'live' AND started_at >= date_trunc('day', now())"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "purple"
-          }
-        },
-        "overrides": []
-      },
+      "id": 3,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -127,45 +141,41 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Query error rate",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 8,
-        "y": 3
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE status = 'failed') / NULLIF(COUNT(*), 0) FROM monitoring.query_log WHERE $__timeFilter(started_at)"
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE variant = 'live' AND started_at >= date_trunc('day', now())",
+          "refId": "A"
         }
       ],
+      "title": "Live queries today",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -183,7 +193,19 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "id": 4,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -191,51 +213,70 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "Last query time",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 12,
-        "y": 3
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT duration_ms FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1"
+          "rawQuery": true,
+          "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE status = 'failed') / NULLIF(COUNT(*), 0) FROM monitoring.query_log WHERE $__timeFilter(started_at)",
+          "refId": "A"
         }
       ],
+      "title": "Query error rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "orange"
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "ms"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "id": 5,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -243,51 +284,70 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT duration_ms FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Last query time",
+      "type": "stat"
     },
     {
-      "id": 6,
-      "type": "stat",
-      "title": "Pipeline median \u2013 raw",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 3
+        "y": 0
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) AND variant = 'raw'"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
+      "id": 6,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -295,51 +355,70 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) AND variant = 'raw'",
+          "refId": "A"
+        }
+      ],
+      "title": "Pipeline median – raw",
+      "type": "stat"
     },
     {
-      "id": 7,
-      "type": "stat",
-      "title": "Pipeline median \u2013 summary",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 3
+        "y": 0
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) AND variant = 'summary'"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
+      "id": 7,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -347,47 +426,55 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 8,
-      "type": "table",
-      "title": "Latest queries \u2013 newest first",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT started_at AS ran_at, CASE WHEN variant = 'live' THEN 'live' ELSE 'pipeline ' || variant END AS type, replace(query_name, 'Live: ', '') AS query,\n       ROUND(duration_ms, 1) AS ms, rows_returned AS rows, status, error_message\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY log_id DESC LIMIT 50"
+          "rawQuery": true,
+          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) AND variant = 'summary'",
+          "refId": "A"
         }
       ],
+      "title": "Pipeline median – summary",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
             "cellOptions": {
               "type": "auto"
-            }
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           }
         },
         "overrides": [
@@ -407,17 +494,17 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
-                      "success": {
-                        "color": "green",
-                        "index": 0
-                      },
                       "failed": {
                         "color": "red",
                         "index": 1
+                      },
+                      "success": {
+                        "color": "green",
+                        "index": 0
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -425,166 +512,303 @@
           }
         ]
       },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      }
-    },
-    {
-      "id": 9,
-      "type": "barchart",
-      "title": "Live queries \u2013 time per query (last 15)",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
-      },
       "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 8,
+        "w": 24,
         "x": 0,
-        "y": 15
+        "y": 4
       },
+      "id": 8,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT left(replace(query_name, 'Live: ', ''), 45) || ' #' || log_id AS query, duration_ms AS ms\nFROM (SELECT * FROM monitoring.query_log WHERE variant = 'live' AND $__timeFilter(started_at)\n      ORDER BY log_id DESC LIMIT 15) x ORDER BY log_id"
+          "rawQuery": true,
+          "rawSql": "SELECT started_at AS ran_at, CASE WHEN variant = 'live' THEN 'live' ELSE 'pipeline ' || variant END AS type, replace(query_name, 'Live: ', '') AS query,\n       ROUND(duration_ms, 1) AS ms, rows_returned AS rows, status, error_message\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY log_id DESC LIMIT 50",
+          "refId": "A"
         }
       ],
+      "title": "Latest queries – newest first",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "fillOpacity": 80,
-            "lineWidth": 1
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "ms"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "id": 9,
       "options": {
-        "orientation": "horizontal",
-        "showValue": "auto",
-        "stacking": "none",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": 0,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "mode": "multi",
           "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT left(replace(query_name, 'Live: ', ''), 45) || ' #' || log_id AS query, duration_ms AS ms\nFROM (SELECT * FROM monitoring.query_log WHERE variant = 'live' AND $__timeFilter(started_at)\n      ORDER BY log_id DESC LIMIT 15) x ORDER BY log_id",
+          "refId": "A"
         }
-      }
+      ],
+      "title": "Live queries – time per query (last 15)",
+      "type": "barchart"
     },
     {
-      "id": 10,
-      "type": "barchart",
-      "title": "Queries per day (all) \u2013 with failures",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 12
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT to_char(date_trunc('day', started_at), 'YYYY-MM-DD') AS day,\n       COUNT(*) FILTER (WHERE variant = 'live') AS live,\n       COUNT(*) FILTER (WHERE variant <> 'live') AS pipeline,\n       COUNT(*) FILTER (WHERE status = 'failed') AS failed\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1 ORDER BY 1"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 80,
-            "lineWidth": 1
-          }
-        },
-        "overrides": []
-      },
+      "id": 10,
       "options": {
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": 0,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "mode": "multi",
           "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT to_char(date_trunc('day', started_at), 'YYYY-MM-DD') AS day,\n       COUNT(*) FILTER (WHERE variant = 'live') AS live,\n       COUNT(*) FILTER (WHERE variant <> 'live') AS pipeline,\n       COUNT(*) FILTER (WHERE status = 'failed') AS failed\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
         }
-      }
+      ],
+      "title": "Queries per day (all) – with failures",
+      "type": "barchart"
     },
     {
-      "id": 11,
-      "type": "timeseries",
-      "title": "Execution time of every query (ms)",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 21
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "time_series",
-          "rawSql": "SELECT started_at AS time,\n       CASE WHEN variant = 'live' THEN 'live queries' ELSE split_part(query_name, ' ', 1) || ' ' || variant END AS metric,\n       duration_ms AS value\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY 1"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "barAlignment": 0
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
+      "id": 11,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -593,201 +817,330 @@
           "mode": "multi",
           "sort": "none"
         }
-      }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT started_at AS time,\n       CASE WHEN variant = 'live' THEN 'live queries' ELSE split_part(query_name, ' ', 1) || ' ' || variant END AS metric,\n       duration_ms AS value\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Execution time of every query (ms)",
+      "type": "timeseries"
     },
     {
-      "id": 12,
-      "type": "barchart",
-      "title": "Pipeline queries: median time per query \u2013 last run (ms)",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 29
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw')     AS raw,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary') AS summary\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 80,
-            "lineWidth": 1
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
+      "id": 12,
       "options": {
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": 0,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "mode": "multi",
           "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw')     AS raw,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary') AS summary\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
         }
-      }
+      ],
+      "title": "Pipeline queries: median time per query – last run (ms)",
+      "type": "barchart"
     },
     {
-      "id": 13,
-      "type": "barchart",
-      "title": "Pipeline queries: speed-up from summary tables (x times faster)",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 29
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw') /\n        NULLIF(percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary'), 0))::numeric, 1) AS \"speed-up\"\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 80,
-            "lineWidth": 1
-          }
-        },
-        "overrides": []
-      },
+      "id": 13,
       "options": {
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": 0,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "mode": "multi",
           "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw') /\n        NULLIF(percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary'), 0))::numeric, 1) AS \"speed-up\"\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
         }
-      }
+      ],
+      "title": "Pipeline queries: speed-up from summary tables (x times faster)",
+      "type": "barchart"
     },
     {
-      "id": 14,
-      "type": "table",
-      "title": "Query run details (grouped)",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "failed": {
+                        "color": "red",
+                        "index": 1
+                      },
+                      "success": {
+                        "color": "green",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 38
       },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT run_id, CASE WHEN variant = 'live' THEN 'live' ELSE 'pipeline ' || variant END AS type, query_name, COUNT(*) AS runs, ROUND(AVG(duration_ms),2) AS avg_ms,\n       ROUND(MIN(duration_ms),2) AS min_ms, ROUND(MAX(duration_ms),2) AS max_ms, MAX(rows_returned) AS rows_returned,\n       MIN(status) AS status, MAX(error_message) AS error_message, MAX(started_at) AS last_run\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1,2,3 ORDER BY last_run DESC, query_name"
+          "rawQuery": true,
+          "rawSql": "SELECT run_id, CASE WHEN variant = 'live' THEN 'live' ELSE 'pipeline ' || variant END AS type, query_name, COUNT(*) AS runs, ROUND(AVG(duration_ms),2) AS avg_ms,\n       ROUND(MIN(duration_ms),2) AS min_ms, ROUND(MAX(duration_ms),2) AS max_ms, MAX(rows_returned) AS rows_returned,\n       MIN(status) AS status, MAX(error_message) AS error_message, MAX(started_at) AS last_run\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1,2,3 ORDER BY last_run DESC, query_name",
+          "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            }
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "status"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "success": {
-                        "color": "green",
-                        "index": 0
-                      },
-                      "failed": {
-                        "color": "red",
-                        "index": 1
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      }
+      "title": "Query run details (grouped)",
+      "type": "table"
     }
+  ],
+  "preload": false,
+  "refresh": "10s",
+  "schemaVersion": 40,
+  "tags": [
+    "sdi",
+    "milestone1"
   ],
   "templating": {
     "list": []
   },
-  "annotations": {
-    "list": []
-  }
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SDI 4 - Query Performance",
+  "uid": "sdi-query",
+  "version": 4,
+  "weekStart": ""
 }

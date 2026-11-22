@@ -1,74 +1,69 @@
 {
-  "uid": "sdi-stream",
-  "title": "SDI 2 - Streaming Ingestion",
-  "description": "Micro-batch (streaming) ingestion of *_stream.csv files",
-  "tags": [
-    "sdi",
-    "milestone1"
-  ],
-  "timezone": "browser",
-  "schemaVersion": 39,
-  "version": 1,
-  "editable": true,
-  "refresh": "30s",
-  "time": {
-    "from": "now-7d",
-    "to": "now"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
+  "description": "Micro-batch (streaming) ingestion of *_stream.csv files",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "**Streaming ingestion** \u2013 refresh sales files are fed in micro-batches of 500 events. Latency = inserted_at \u2212 emitted_at, throughput = events \u00f7 seconds, malformed = rows with a missing key or bad date (dropped)."
-      }
-    },
-    {
-      "id": 2,
-      "type": "stat",
-      "title": "Events received",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 0
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT COALESCE(SUM(events_received),0) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          }
-        },
-        "overrides": []
-      },
+      "id": 2,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -76,51 +71,70 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "Avg throughput (events/s)",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 3
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT AVG(throughput_eps) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)"
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(SUM(events_received),0) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)",
+          "refId": "A"
         }
       ],
+      "title": "Events received",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "purple"
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "short"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 3,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -128,51 +142,70 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Avg latency",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 3
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT AVG(latency_sec) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)"
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(throughput_eps) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)",
+          "refId": "A"
         }
       ],
+      "title": "Avg throughput (events/s)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "orange"
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "s"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 4,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -180,45 +213,39 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "Malformed / dropped",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 3
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT COALESCE(SUM(malformed_count),0) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)"
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(latency_sec) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)",
+          "refId": "A"
         }
       ],
+      "title": "Avg latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -235,7 +262,19 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 5,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -243,56 +282,99 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 6,
-      "type": "timeseries",
-      "title": "Events per micro-batch",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
+        "wideLayout": true
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 7
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
-          "format": "time_series",
-          "rawSql": "SELECT inserted_at AS time, 'events received' AS metric, events_received AS value FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)\nUNION ALL SELECT inserted_at, 'events loaded', events_loaded FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)\nORDER BY 1"
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(SUM(malformed_count),0) FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)",
+          "refId": "A"
         }
       ],
+      "title": "Malformed / dropped",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "lineWidth": 2,
             "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
             "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "auto",
-            "barAlignment": 0
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "short"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 6,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -301,52 +383,96 @@
           "mode": "multi",
           "sort": "none"
         }
-      }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT inserted_at AS time, 'events received' AS metric, events_received AS value FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)\nUNION ALL SELECT inserted_at, 'events loaded', events_loaded FROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at)\nORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Events per micro-batch",
+      "type": "timeseries"
     },
     {
-      "id": 7,
-      "type": "timeseries",
-      "title": "Throughput (events per second)",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 4
       },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "time_series",
-          "rawSql": "SELECT inserted_at AS time, file_name AS metric, throughput_eps AS value FROM monitoring.stream_ingestion_log\nWHERE $__timeFilter(emitted_at) ORDER BY 1"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "barAlignment": 0
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
+      "id": 7,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -355,52 +481,96 @@
           "mode": "multi",
           "sort": "none"
         }
-      }
-    },
-    {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Latency per micro-batch (seconds)",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 15
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "time_series",
-          "rawSql": "SELECT inserted_at AS time, file_name AS metric, latency_sec AS value FROM monitoring.stream_ingestion_log\nWHERE $__timeFilter(emitted_at) ORDER BY 1"
+          "rawQuery": true,
+          "rawSql": "SELECT inserted_at AS time, file_name AS metric, throughput_eps AS value FROM monitoring.stream_ingestion_log\nWHERE $__timeFilter(emitted_at) ORDER BY 1",
+          "refId": "A"
         }
       ],
+      "title": "Throughput (events per second)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "lineWidth": 2,
             "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
             "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "auto",
-            "barAlignment": 0
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "s"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "id": 8,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -409,52 +579,96 @@
           "mode": "multi",
           "sort": "none"
         }
-      }
-    },
-    {
-      "id": 9,
-      "type": "timeseries",
-      "title": "Malformed / dropped records",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 15
-      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "time_series",
-          "rawSql": "SELECT inserted_at AS time, 'malformed' AS metric, malformed_count AS value FROM monitoring.stream_ingestion_log\nWHERE $__timeFilter(emitted_at) ORDER BY 1"
+          "rawQuery": true,
+          "rawSql": "SELECT inserted_at AS time, file_name AS metric, latency_sec AS value FROM monitoring.stream_ingestion_log\nWHERE $__timeFilter(emitted_at) ORDER BY 1",
+          "refId": "A"
         }
       ],
+      "title": "Latency per micro-batch (seconds)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "bars",
-            "lineWidth": 2,
             "fillOpacity": 30,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
             "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "auto",
-            "barAlignment": 0
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           },
           "unit": "short"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "id": 9,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -463,101 +677,179 @@
           "mode": "multi",
           "sort": "none"
         }
-      }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT inserted_at AS time, 'malformed' AS metric, malformed_count AS value FROM monitoring.stream_ingestion_log\nWHERE $__timeFilter(emitted_at) ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Malformed / dropped records",
+      "type": "timeseries"
     },
     {
-      "id": 10,
-      "type": "table",
-      "title": "Stream files",
-      "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 20
       },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT batch_id, file_name, COUNT(*) AS micro_batches, SUM(events_received) AS events, SUM(events_loaded) AS loaded,\n       SUM(malformed_count) AS malformed, ROUND(AVG(latency_sec),3) AS avg_latency_s, ROUND(AVG(throughput_eps)) AS avg_eps,\n       MIN(emitted_at) AS started, MAX(inserted_at) AS finished\nFROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at) GROUP BY 1, 2 ORDER BY 1 DESC"
+          "rawQuery": true,
+          "rawSql": "SELECT batch_id, file_name, COUNT(*) AS micro_batches, SUM(events_received) AS events, SUM(events_loaded) AS loaded,\n       SUM(malformed_count) AS malformed, ROUND(AVG(latency_sec),3) AS avg_latency_s, ROUND(AVG(throughput_eps)) AS avg_eps,\n       MIN(emitted_at) AS started, MAX(inserted_at) AS finished\nFROM monitoring.stream_ingestion_log WHERE $__timeFilter(emitted_at) GROUP BY 1, 2 ORDER BY 1 DESC",
+          "refId": "A"
         }
       ],
+      "title": "Stream files",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
             "cellOptions": {
               "type": "auto"
-            }
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           }
         },
         "overrides": []
-      },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      }
-    },
-    {
-      "id": 11,
-      "type": "table",
-      "title": "Rejected (malformed) records",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 20
       },
+      "id": 11,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "pharma-pg"
           },
-          "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT batch_id, micro_batch_no, reason, LEFT(raw_record, 160) AS record, rejected_at\nFROM monitoring.stream_rejects WHERE $__timeFilter(rejected_at) ORDER BY reject_id DESC LIMIT 200"
+          "rawQuery": true,
+          "rawSql": "SELECT batch_id, micro_batch_no, reason, LEFT(raw_record, 160) AS record, rejected_at\nFROM monitoring.stream_rejects WHERE $__timeFilter(rejected_at) ORDER BY reject_id DESC LIMIT 200",
+          "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            }
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      }
+      "title": "Rejected (malformed) records",
+      "type": "table"
     }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 40,
+  "tags": [
+    "sdi",
+    "milestone1"
   ],
   "templating": {
     "list": []
   },
-  "annotations": {
-    "list": []
-  }
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SDI 2 - Streaming Ingestion",
+  "uid": "sdi-stream",
+  "version": 2,
+  "weekStart": ""
 }
