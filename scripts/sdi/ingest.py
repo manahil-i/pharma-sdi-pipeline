@@ -38,15 +38,21 @@ def setup_databases():
 
 def staging_table_for(path):
     for prefix, table in config.FILE_TABLES.items():
-        if Path(path).name.startswith(prefix):
+        if Path(path).name.lower().startswith(prefix):      # not case-sensitive
             return table
     return None
 
 
 def landing_files():
-    """All CSV files waiting in the landing folder that we know how to load (sorted: 01, 04, 05, 06)."""
+    """All CSV files waiting in the landing folder that we know how to load (sorted: 01, 04, 05, 06).
+    A file is only taken when its size stays the same for 2 seconds, so a file that is still being
+    copied into the folder is left for the next run instead of being loaded half-finished."""
     files = [p for p in sorted(config.LANDING.glob("*.csv")) if staging_table_for(p)]
-    return files
+    if not files:
+        return []
+    sizes = {p: p.stat().st_size for p in files}
+    time.sleep(2)
+    return [p for p in files if p.exists() and p.stat().st_size == sizes[p] and sizes[p] > 0]
 
 
 def files_waiting():

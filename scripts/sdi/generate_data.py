@@ -29,6 +29,7 @@ Run:  python -m sdi.generate_data --refresh 1        (or trigger the Airflow DAG
 """
 import argparse
 import json
+import os
 import datetime as dt
 import calendar
 
@@ -82,7 +83,8 @@ def sample_pool(con):
                                                       THEN CAST(substr(PrescriptionID, 4) AS BIGINT) END)
                                       FROM src""").fetchone()
     pool = con.execute("""SELECT * FROM src WHERE SalesDate LIKE '2025-%'
-                          AND SalesDate NOT IN (SELECT d FROM bulk)""").df().fillna("")   # empty cells stay ''
+                          AND SalesDate NOT IN (SELECT d FROM bulk)
+                          ORDER BY SalesTransactionID""").df().fillna("")   # fixed order = reproducible sample
     return pool, max_sale, max_rx
 
 
@@ -97,7 +99,7 @@ def make_sales(pool, months, n, rng, max_sale, max_rx):
         parts.append(s)
         stats.append(dict(month=str(month), source_month=f"2025-{month.month:02d}", source_rows=len(same),
                           generated_rows=size))
-    s = pd.concat(parts, ignore_index=True).sort_values("SalesTimestampUTC", ignore_index=True)
+    s = pd.concat(parts, ignore_index=True).sort_values("SalesTimestampUTC", kind="stable", ignore_index=True)
 
     # quantities: lines with 2+ packs get -1 or +1 pack 25% of the time (symmetric, so the average stays the same)
     qty0 = s.QuantitySoldPacks.astype(int)
@@ -120,7 +122,8 @@ def make_sales(pool, months, n, rng, max_sale, max_rx):
     s["CostOfGoodsSoldUSD"] = cogs
     s["GrossMarginUSD"] = money(net - cogs)
     s["ReturnedQuantityPacks"] = np.minimum(s.ReturnedQuantityPacks.astype(int), qty)
-    s["BatchExpiryDate"] = [f"{int(t[:4]) + 1}{t[4:]}" if t else t for t in s.BatchExpiryDate]
+    s["BatchExpiryDate"] = [f"{int(t[:4]) + 1}{t[4:]}".replace("-02-29", "-02-28") if t else t
+                            for t in s.BatchExpiryDate]
 
     # new unique IDs – refresh n starts at its own block so refreshes never collide
     start = max_sale + (n - 1) * 1_000_000 + 1
@@ -222,8 +225,11 @@ def generate(refresh=1, seed=None):
 
     sales_path = config.LANDING / f"05_pharmacy_sales_data_refresh{refresh}{config.STREAM_MARKER}.csv"
     demand_path = config.LANDING / f"06_hospital_demand_data_refresh{refresh}.csv"
-    sales.to_csv(sales_path, index=False)
-    demand.to_csv(demand_path, index=False)
+    # write to a temporary name first, then rename: the pipeline never sees a half-written file
+    for df, path in ((demand, demand_path), (sales, sales_path)):
+        tmp = path.with_suffix(".part")
+        df.to_csv(tmp, index=False)
+        os.replace(tmp, path)
 
     stats = dict(
         refresh=refresh, months=[str(m) for m in months], created_at=dt.datetime.now().isoformat(timespec="seconds"),

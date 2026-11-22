@@ -134,6 +134,8 @@ def build_dim_medicine(con, batches):
         "legal_control": m.controlled_medicine_flag, "cold_chain": m.cold_chain_flag,
         "shelf_life": m.shelf_life_months.astype(int), "price_tier": rrp.map(ref.price_tier),
         "eff_from": pd.to_datetime(m.effective_from_date).dt.date})
+    if is_empty(con, "dim_medicine", "medicine_key"):      # first versions must cover all history
+        inc["eff_from"] = START_OF_HISTORY
     type2 = ["presc_class", "legal_control"]
     type1 = [c for c in inc.columns if c not in type2 + ["gtin14", "eff_from"]]
     res = merge_dimension(con, "dim_medicine", "medicine_key", "gtin14", inc, type1, type2, "seq_medicine")
@@ -169,8 +171,10 @@ def build_dim_warehouse(con, batches):
 def build_dim_pharmacy(con, sales):
     if sales.empty:
         return {}
-    first = sales.groupby("pharmacy_id").sales_date.min()
     p = latest_per_key(sales, "pharmacy_id", "sales_date")
+    # a new version starts on the first date its (latest) pharmacy_type is seen in this batch
+    first = (sales.merge(p[["pharmacy_id", "pharmacy_type"]], on=["pharmacy_id", "pharmacy_type"])
+             .groupby("pharmacy_id").sales_date.min())
     empty = is_empty(con, "dim_pharmacy", "pharmacy_key")
     inc = pd.DataFrame({
         "pharmacy_id": p.pharmacy_id, "pharmacy_gln": p.pharmacy_gln, "pharmacy_name": p.pharmacy_name,
@@ -185,8 +189,10 @@ def build_dim_pharmacy(con, sales):
 def build_dim_hospital(con, demand):
     if demand.empty:
         return {}
-    first = demand.groupby("hospital_id").demand_month.min()
     h = latest_per_key(demand, "hospital_id", "demand_month")
+    # a new version starts in the first month its (latest) hospital_type is seen in this batch
+    first = (demand.merge(h[["hospital_id", "hospital_type"]], on=["hospital_id", "hospital_type"])
+             .groupby("hospital_id").demand_month.min())
     empty = is_empty(con, "dim_hospital", "hospital_key")
     beds, icu, occ = h.licensed_beds.astype(int), h.icu_beds.astype(int), h.average_occupancy_rate_pct.astype(float)
     inc = pd.DataFrame({
@@ -283,8 +289,11 @@ SELECT CAST(strftime(s.sales_date, '%Y%m%d') AS INTEGER)      AS date_key,
        COUNT(NULLIF(s.prescription_id, ''))                     AS rx_count,
        MAX(s.batch_id)                                          AS load_batch_id
 FROM s
-LEFT JOIN dim_medicine m ON m.gtin14 = s.gtin14 AND m.is_current = 'Y'
-LEFT JOIN dim_pharmacy p ON p.pharmacy_id = s.pharmacy_id AND p.is_current = 'Y'
+-- SCD Type 2: use the dimension version that was valid on the sales date
+LEFT JOIN dim_medicine m ON m.gtin14 = s.gtin14
+                        AND s.sales_date BETWEEN m.row_effective_from AND m.row_effective_to
+LEFT JOIN dim_pharmacy p ON p.pharmacy_id = s.pharmacy_id
+                        AND s.sales_date BETWEEN p.row_effective_from AND p.row_effective_to
 LEFT JOIN dim_location l ON l.city = s.city AND l.state = s.state
 LEFT JOIN dim_warehouse w ON w.warehouse_id = s.warehouse_id
 LEFT JOIN ref_medicine_price pr ON pr.gtin14 = s.gtin14
@@ -309,8 +318,11 @@ SELECT CAST(strftime(d.demand_month, '%Y%m%d') AS INTEGER) AS date_key,
        d.forecast, d.requested, d.approved, d.received, d.emergency, d.opening, d.dispensed, d.consumed,
        d.wasted, d.unfulfilled, d.stockout_days, d.cases, d.admissions, d.opd, d.batch_id
 FROM d
-LEFT JOIN dim_medicine m ON m.gtin14 = d.gtin14 AND m.is_current = 'Y'
-LEFT JOIN dim_hospital h ON h.hospital_id = d.hospital_id AND h.is_current = 'Y'
+-- SCD Type 2: use the dimension version that was valid in the demand month
+LEFT JOIN dim_medicine m ON m.gtin14 = d.gtin14
+                        AND d.demand_month BETWEEN m.row_effective_from AND m.row_effective_to
+LEFT JOIN dim_hospital h ON h.hospital_id = d.hospital_id
+                        AND d.demand_month BETWEEN h.row_effective_from AND h.row_effective_to
 LEFT JOIN dim_location l ON l.city = d.city AND l.state = d.state
 LEFT JOIN map_city_warehouse cw ON cw.city = d.city AND cw.state = d.state
 LEFT JOIN dim_warehouse w ON w.warehouse_id = cw.warehouse_id

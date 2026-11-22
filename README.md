@@ -17,13 +17,14 @@ CSV files ──► data/landing ──► PostgreSQL staging ──► validati
 | Staging + monitoring | PostgreSQL 16 (database `pharma`, schemas `staging` and `monitoring`) |
 | Data mart | DuckDB 1.1.3 (file `mart/sdi_mart.duckdb`) |
 | Dashboards | Grafana 11.3 (provisioned automatically) |
+| Ingestion API | FastAPI + uvicorn (http://localhost:8000/docs) |
 | Language | Python 3.11 (pandas, numpy, psycopg2, duckdb) |
 
 ## Quick start
 1. Put the 4 original files in `data/source/` with exactly these names:
    `01_master_data.csv`, `04_warehouse_data.csv`, `05_pharmacy_sales_data.csv`, `06_hospital_demand_data.csv`
 2. `docker compose up -d --build` (first time ≈ 5–10 min)
-3. Airflow → http://localhost:8080 (airflow / airflow) · Grafana → http://localhost:3000 (admin / admin)
+3. Airflow → http://localhost:8080 (airflow / airflow) · Grafana → http://localhost:3000 (admin / admin) · API → http://localhost:8000/docs
 4. Copy the 4 files from `data/source/` to `data/landing/` and un-pause the DAG **sdi_pipeline** → initial load
 5. Refresh: trigger **sdi_generate_data** with `{"refresh": 1}` (then 2) → the pipeline picks the new files up
 
@@ -40,6 +41,7 @@ CSV files ──► data/landing ──► PostgreSQL staging ──► validati
 | `scripts/sdi/query_layer.py` | summary tables + timed query runs (raw vs summary) |
 | `scripts/sdi/storage_metrics.py` | rows / MB / date range per table and layer |
 | `scripts/sdi/generate_data.py` | data oversampling generator |
+| `api/main.py` | own ingestion API: upload CSV, send JSON rows, start generator/pipeline, status |
 | `scripts/sdi/api_trigger.py` | REST-API client (trigger refresh / pipeline, show status) |
 | `scripts/sdi/mart_sql.py` | run SQL on the mart; `check` = health check |
 | `sql/postgres/` | staging + monitoring tables |

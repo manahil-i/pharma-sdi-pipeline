@@ -1,7 +1,7 @@
 {
   "uid": "sdi-query",
   "title": "SDI 4 - Query Performance",
-  "description": "Execution time of the analytical queries - raw star join vs summary table",
+  "description": "Every query is logged: the 6 pipeline queries (raw vs summary) after each load, and every query typed live with mart_sql",
   "tags": [
     "sdi",
     "milestone1"
@@ -10,7 +10,7 @@
   "schemaVersion": 39,
   "version": 1,
   "editable": true,
-  "refresh": "30s",
+  "refresh": "10s",
   "time": {
     "from": "now-7d",
     "to": "now"
@@ -28,13 +28,13 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Query layer** \u2013 each dashboard query runs 3 times in two versions after every load: **raw** = joins the big fact tables, **summary** = reads a small pre-aggregated table (optimisation). Speed-up = raw time \u00f7 summary time."
+        "content": "**Query layer** \u2013 every query is timed and logged. **Live** = typed in the terminal (`mart_sql shell`), shown within 10 s. **Pipeline** = the 6 dashboard queries run after every load in two versions: **raw** (joins the big fact tables) and **summary** (reads a small pre-aggregated table). Speed-up = raw time \u00f7 summary time."
       }
     },
     {
       "id": 2,
       "type": "stat",
-      "title": "Queries in last run",
+      "title": "Queries executed today",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -42,7 +42,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 4,
         "x": 0,
         "y": 3
       },
@@ -56,7 +56,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT COUNT(DISTINCT query_name) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1)"
+          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE started_at >= date_trunc('day', now())"
         }
       ],
       "fieldConfig": {
@@ -85,7 +85,7 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Median time \u2013 raw",
+      "title": "Live queries today",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -93,8 +93,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 4,
         "y": 3
       },
       "targets": [
@@ -107,7 +107,122 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1) AND variant = 'raw'"
+          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE variant = 'live' AND started_at >= date_trunc('day', now())"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Query error rate",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE status = 'failed') / NULLIF(COUNT(*), 0) FROM monitoring.query_log WHERE $__timeFilter(started_at)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Last query time",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT duration_ms FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1"
         }
       ],
       "fieldConfig": {
@@ -135,9 +250,9 @@
       }
     },
     {
-      "id": 4,
+      "id": 6,
       "type": "stat",
-      "title": "Median time \u2013 summary",
+      "title": "Pipeline median \u2013 raw",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -145,8 +260,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 4,
+        "x": 16,
         "y": 3
       },
       "targets": [
@@ -159,7 +274,59 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1) AND variant = 'summary'"
+          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) AND variant = 'raw'"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Pipeline median \u2013 summary",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) AND variant = 'summary'"
         }
       ],
       "fieldConfig": {
@@ -187,80 +354,17 @@
       }
     },
     {
-      "id": 5,
-      "type": "stat",
-      "title": "Failed queries",
+      "id": 8,
+      "type": "table",
+      "title": "Latest queries \u2013 newest first",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 3
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "pharma-pg"
-          },
-          "rawQuery": true,
-          "editorMode": "code",
-          "format": "table",
-          "rawSql": "SELECT COUNT(*) FROM monitoring.query_log WHERE status = 'failed' AND $__timeFilter(started_at)"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "value",
-        "justifyMode": "center"
-      }
-    },
-    {
-      "id": 6,
-      "type": "barchart",
-      "title": "Median execution time per query \u2013 last run (ms)",
-      "description": "",
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "pharma-pg"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 8,
+        "w": 24,
         "x": 0,
         "y": 7
       },
@@ -274,7 +378,84 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw')     AS raw,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary') AS summary\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
+          "rawSql": "SELECT started_at AS ran_at, CASE WHEN variant = 'live' THEN 'live' ELSE 'pipeline ' || variant END AS type, replace(query_name, 'Live: ', '') AS query,\n       ROUND(duration_ms, 1) AS ms, rows_returned AS rows, status, error_message\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY log_id DESC LIMIT 50"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "success": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "failed": {
+                        "color": "red",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 9,
+      "type": "barchart",
+      "title": "Live queries \u2013 time per query (last 15)",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT left(replace(query_name, 'Live: ', ''), 45) || ' #' || log_id AS query, duration_ms AS ms\nFROM (SELECT * FROM monitoring.query_log WHERE variant = 'live' AND $__timeFilter(started_at)\n      ORDER BY log_id DESC LIMIT 15) x ORDER BY log_id"
         }
       ],
       "fieldConfig": {
@@ -288,7 +469,7 @@
         "overrides": []
       },
       "options": {
-        "orientation": "auto",
+        "orientation": "horizontal",
         "showValue": "auto",
         "stacking": "none",
         "groupWidth": 0.7,
@@ -306,9 +487,9 @@
       }
     },
     {
-      "id": 7,
+      "id": 10,
       "type": "barchart",
-      "title": "Speed-up from summary tables (x times faster)",
+      "title": "Queries per day (all) \u2013 with failures",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -318,7 +499,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 15
       },
       "targets": [
         {
@@ -330,7 +511,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw') /\n        NULLIF(percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary'), 0))::numeric, 1) AS \"speed-up\"\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
+          "rawSql": "SELECT to_char(date_trunc('day', started_at), 'YYYY-MM-DD') AS day,\n       COUNT(*) FILTER (WHERE variant = 'live') AS live,\n       COUNT(*) FILTER (WHERE variant <> 'live') AS pipeline,\n       COUNT(*) FILTER (WHERE status = 'failed') AS failed\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1 ORDER BY 1"
         }
       ],
       "fieldConfig": {
@@ -361,9 +542,9 @@
       }
     },
     {
-      "id": 8,
+      "id": 11,
       "type": "timeseries",
-      "title": "Execution time over time (ms)",
+      "title": "Execution time of every query (ms)",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -373,7 +554,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "targets": [
         {
@@ -385,7 +566,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "time_series",
-          "rawSql": "SELECT started_at AS time, split_part(query_name, ' ', 1) || ' ' || variant AS metric, duration_ms AS value\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY 1"
+          "rawSql": "SELECT started_at AS time,\n       CASE WHEN variant = 'live' THEN 'live queries' ELSE split_part(query_name, ' ', 1) || ' ' || variant END AS metric,\n       duration_ms AS value\nFROM monitoring.query_log WHERE $__timeFilter(started_at) ORDER BY 1"
         }
       ],
       "fieldConfig": {
@@ -415,19 +596,19 @@
       }
     },
     {
-      "id": 9,
-      "type": "table",
-      "title": "Query run details",
+      "id": 12,
+      "type": "barchart",
+      "title": "Pipeline queries: median time per query \u2013 last run (ms)",
       "description": "",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
       },
       "gridPos": {
-        "h": 10,
-        "w": 24,
+        "h": 9,
+        "w": 12,
         "x": 0,
-        "y": 24
+        "y": 32
       },
       "targets": [
         {
@@ -439,7 +620,118 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT run_id, query_name, widget, variant, COUNT(*) AS runs, ROUND(AVG(duration_ms),2) AS avg_ms,\n       ROUND(MIN(duration_ms),2) AS min_ms, ROUND(MAX(duration_ms),2) AS max_ms, MAX(rows_returned) AS rows_returned,\n       MIN(status) AS status, MAX(error_message) AS error_message, MAX(started_at) AS last_run\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1,2,3,4 ORDER BY last_run DESC, query_name, variant"
+          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw')     AS raw,\n       percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary') AS summary\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "barchart",
+      "title": "Pipeline queries: speed-up from summary tables (x times faster)",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT split_part(query_name, ' ', 1) AS query,\n       ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'raw') /\n        NULLIF(percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE variant = 'summary'), 0))::numeric, 1) AS \"speed-up\"\nFROM monitoring.query_log WHERE run_id = (SELECT run_id FROM monitoring.query_log WHERE variant <> 'live' ORDER BY log_id DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "table",
+      "title": "Query run details (grouped)",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT run_id, CASE WHEN variant = 'live' THEN 'live' ELSE 'pipeline ' || variant END AS type, query_name, COUNT(*) AS runs, ROUND(AVG(duration_ms),2) AS avg_ms,\n       ROUND(MIN(duration_ms),2) AS min_ms, ROUND(MAX(duration_ms),2) AS max_ms, MAX(rows_returned) AS rows_returned,\n       MIN(status) AS status, MAX(error_message) AS error_message, MAX(started_at) AS last_run\nFROM monitoring.query_log WHERE $__timeFilter(started_at) GROUP BY 1,2,3 ORDER BY last_run DESC, query_name"
         }
       ],
       "fieldConfig": {

@@ -3,6 +3,7 @@
 #   postgres   : Airflow's own database + our "pharma" database (staging + monitoring)
 #   airflow-*  : orchestration (web UI on http://localhost:8080, user airflow / airflow)
 #   grafana    : monitoring dashboards (http://localhost:3000, user admin / admin)
+#   sdi-api    : our ingestion API (http://localhost:8000/docs)
 # The DuckDB data mart is a file: ./mart/sdi_mart.duckdb
 # Start:  docker compose up -d --build        Stop:  docker compose down
 # =====================================================================
@@ -19,6 +20,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
     AIRFLOW__WEBSERVER__WORKERS: "2"              # fewer web workers = less memory on a laptop
+    AIRFLOW__WEBSERVER__SECRET_KEY: "sdi-milestone1-local-key"   # same key in all containers (task logs in the UI)
     PYTHONPATH: /opt/airflow/scripts
     SDI_HOME: /opt/airflow
     PHARMA_DB_HOST: postgres
@@ -101,6 +103,31 @@ services:
       <<: *airflow-depends
       airflow-init:
         condition: service_completed_successfully
+
+  sdi-api:                                  # our own ingestion API -> http://localhost:8000/docs
+    build: ./api
+    image: sdi-api:1.0
+    environment:
+      PYTHONPATH: /app/scripts
+      SDI_HOME: /app
+      PHARMA_DB_HOST: postgres
+      PHARMA_DB_PORT: "5432"
+      PHARMA_DB_NAME: pharma
+      PHARMA_DB_USER: airflow
+      PHARMA_DB_PASSWORD: airflow
+      AIRFLOW_API_URL: http://airflow-webserver:8080/api/v1
+      AIRFLOW_API_AUTH: airflow:airflow
+    volumes:
+      - ./api:/app/api              # the API code
+      - ./scripts:/app/scripts      # re-uses config.py and api_trigger.py of the pipeline
+      - ./data:/app/data            # writes into data/landing
+    user: "${AIRFLOW_UID:-50000}:0"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
 
   grafana:
     image: grafana/grafana:11.3.0

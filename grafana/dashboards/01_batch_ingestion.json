@@ -42,7 +42,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 3
       },
@@ -93,8 +93,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 5,
         "y": 3
       },
       "targets": [
@@ -137,6 +137,74 @@
     {
       "id": 4,
       "type": "stat",
+      "title": "Batch success rate",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 10,
+        "y": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE status = 'success') / NULLIF(COUNT(*), 0) FROM monitoring.batch_ingestion_log WHERE $__timeFilter(started_at)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
       "title": "Failed loads",
       "description": "",
       "datasource": {
@@ -145,8 +213,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 4,
+        "x": 15,
         "y": 3
       },
       "targets": [
@@ -198,7 +266,7 @@
       }
     },
     {
-      "id": 5,
+      "id": 6,
       "type": "stat",
       "title": "Avg load duration",
       "description": "",
@@ -208,8 +276,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 19,
         "y": 3
       },
       "targets": [
@@ -250,7 +318,7 @@
       }
     },
     {
-      "id": 6,
+      "id": 7,
       "type": "barchart",
       "title": "Rows processed per batch",
       "description": "One bar per loaded file",
@@ -306,7 +374,7 @@
       }
     },
     {
-      "id": 7,
+      "id": 8,
       "type": "barchart",
       "title": "Load duration per batch (seconds)",
       "description": "",
@@ -362,7 +430,7 @@
       }
     },
     {
-      "id": 8,
+      "id": 9,
       "type": "timeseries",
       "title": "Rows loaded over time",
       "description": "",
@@ -416,7 +484,7 @@
       }
     },
     {
-      "id": 9,
+      "id": 10,
       "type": "barchart",
       "title": "Success vs failure",
       "description": "",
@@ -471,7 +539,7 @@
       }
     },
     {
-      "id": 10,
+      "id": 11,
       "type": "table",
       "title": "Batch load history",
       "description": "",
@@ -548,7 +616,7 @@
       }
     },
     {
-      "id": 11,
+      "id": 12,
       "type": "barchart",
       "title": "Data-quality: rows rejected per rule",
       "description": "",
@@ -603,7 +671,7 @@
       }
     },
     {
-      "id": 12,
+      "id": 13,
       "type": "table",
       "title": "Data-quality: valid vs rejected per staging table",
       "description": "",
@@ -640,6 +708,138 @@
           }
         },
         "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 14,
+      "type": "barchart",
+      "title": "Ingestion API: requests by endpoint",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 0,
+        "y": 39
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT endpoint, COUNT(*) FILTER (WHERE status = 'success') AS success,\n       COUNT(*) FILTER (WHERE status <> 'success') AS \"rejected / failed\"\nFROM monitoring.api_requests WHERE $__timeFilter(requested_at) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "normal",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": "table",
+      "title": "Ingestion API: last requests",
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "pharma-pg"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 14,
+        "x": 10,
+        "y": 39
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "pharma-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT requested_at, endpoint, file_name, rows_received, status, message\nFROM monitoring.api_requests WHERE $__timeFilter(requested_at) ORDER BY request_id DESC LIMIT 100"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "success": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "failed": {
+                        "color": "red",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,

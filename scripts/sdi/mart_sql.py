@@ -5,13 +5,16 @@ Examples (inside Docker):
   docker compose exec airflow-scheduler python -m sdi.mart_sql check            <- health check of the whole mart
   docker compose exec airflow-scheduler python -m sdi.mart_sql /opt/airflow/sql/queries/q2_forecast_accuracy_flu_season.sql
   docker compose exec airflow-scheduler python -m sdi.mart_sql "EXPLAIN ANALYZE SELECT ..."   <- query plan + timings
+  docker compose exec -it airflow-scheduler python -m sdi.mart_sql shell        <- type queries live (demo)
 """
 import sys
+import time
+import uuid
 from pathlib import Path
 
 import pandas as pd
 
-from .db import mart
+from .db import mart, pg
 
 pd.set_option("display.width", 250)
 pd.set_option("display.max_columns", 30)
@@ -47,25 +50,107 @@ CHECKS = {
 
 
 def run(sql, con):
+    """Run one query and print the answer. Returns the number of rows."""
     if sql.strip().upper().startswith("EXPLAIN"):          # query plans: print the plan as text, not as a table
-        for row in con.execute(sql).fetchall():
+        rows = con.execute(sql).fetchall()
+        for row in rows:
             print(row[-1])
-        return
-    print(con.execute(sql).df().to_string(index=False))
+        return len(rows)
+    df = con.execute(sql).df()
+    print(df.to_string(index=False))
+    return len(df)
+
+
+SHELL_HELP = """SDI data mart – live query shell (read-only)
+  Type any SQL and end it with ;   (it may span several lines)
+  Every query is timed and shown on the Grafana 'Query Performance' dashboard
+  tables;            list the tables of the mart
+  describe <table>;  show the columns of a table
+  exit;              leave the shell
+"""
+
+
+SESSION = "live-" + uuid.uuid4().hex[:6]        # one id per terminal session
+
+
+def log_live_query(sql, ms, status, err, rows=0, title=None):
+    """Save a query you ran into monitoring.query_log (variant 'live') -> every panel of the
+    Grafana 'Query Performance' dashboard includes it (counts, error rate, times, tables)."""
+    name = "Live: " + (title or " ".join(sql.split()))[:70]
+    try:
+        with pg() as conn, conn.cursor() as cur:
+            cur.execute("""INSERT INTO monitoring.query_log (run_id, query_name, widget, variant, started_at,
+                           duration_ms, rows_returned, status, error_message)
+                           VALUES (%s, %s, 'live query', 'live', now(), %s, %s, %s, %s)""",
+                        (SESSION, name, round(ms, 2), rows, status, err))
+    except Exception as e:                       # logging must never stop the answer from being shown
+        print("(not logged:", e, ")")
+
+
+def run_live(sql, title=None):
+    """Run one query, print the answer and its time, and log it for the dashboard."""
+    t0 = time.perf_counter()
+    status, err, rows = "success", None, 0
+    try:
+        with mart(read_only=True) as con:
+            rows = run(sql, con)
+    except Exception as e:
+        status, err = "failed", str(e)[:300]
+        print(f"Error: {e}")
+    ms = (time.perf_counter() - t0) * 1000
+    print(f"({ms:.0f} ms)\n")
+    log_live_query(sql, ms, status, err, rows, title)
+
+
+def shell():
+    """Interactive prompt for live demos. A fresh read-only connection is opened for every query,
+    so the pipeline is never blocked between queries."""
+    print(SHELL_HELP)
+    buf = []
+    while True:
+        try:
+            line = input("sdi> " if not buf else " ..> ")
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        buf.append(line)
+        if not line.rstrip().endswith(";"):
+            continue
+        sql = " ".join(buf).strip().rstrip(";").strip()
+        buf = []
+        if sql.lower() in ("exit", "quit"):
+            break
+        if sql.lower() == "tables":
+            sql = "SELECT table_name, estimated_size AS approx_rows FROM duckdb_tables() ORDER BY 1"
+        elif sql.lower().startswith("describe "):
+            sql = f"SELECT column_name, data_type FROM duckdb_columns() WHERE table_name = '{sql.split()[1]}'"
+        run_live(sql)
 
 
 def main(arg):
-    with mart(read_only=True) as con:
-        if arg == "check":
+    if arg == "shell":
+        return shell()
+    if arg == "check":                           # health check: not logged as a query
+        with mart(read_only=True) as con:
             for title, sql in CHECKS.items():
                 print(f"\n=== {title}")
                 run(sql, con)
-        elif arg.endswith(".sql") and Path(arg).exists():
+    elif arg.endswith(".sql") and Path(arg).exists():
+        text = open(arg, encoding="utf-8").read()
+        if "-- @raw" in text:                    # one of the 6 query-layer files: run its raw version
             from .query_layer import parse_query_file
-            _, _, variants = parse_query_file(Path(arg))
-            run(variants.get("raw") or open(arg).read(), con)
-        else:
-            run(arg, con)
+            name, _, variants = parse_query_file(Path(arg))
+            print(f"=== {name}")
+            run_live(variants["raw"], name)
+        else:                                    # a plain file with several queries separated by ;
+            for sql in [q.strip() for q in text.split(";")]:
+                body = "\n".join(l for l in sql.splitlines() if not l.strip().startswith("--")).strip()
+                if body:
+                    title = next((l.strip("- ") for l in sql.splitlines() if l.strip().startswith("--")), "")
+                    print(f"\n=== {title}")
+                    run_live(body, title)
+    else:
+        run_live(arg)
 
 
 if __name__ == "__main__":
