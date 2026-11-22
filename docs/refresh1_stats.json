@@ -1,0 +1,105 @@
+{
+  "refresh": 1,
+  "months": [
+    "2026-01-01",
+    "2026-02-01",
+    "2026-03-01"
+  ],
+  "created_at": "2026-11-22T10:39:24",
+  "method": "bootstrap sampling of the same calendar month of 2025 (bulk-posted days excluded)",
+  "parameters": {
+    "volume_growth": 0.04,
+    "price_inflation": 0.03,
+    "tax_rate": 0.06,
+    "seed": 1001
+  },
+  "sales": {
+    "file": "05_pharmacy_sales_data_refresh1_stream.csv",
+    "rows_written": 30011,
+    "per_month": [
+      {
+        "month": "2026-01-01",
+        "source_month": "2025-01",
+        "source_rows": 12380,
+        "generated_rows": 13115
+      },
+      {
+        "month": "2026-02-01",
+        "source_month": "2025-02",
+        "source_rows": 7773,
+        "generated_rows": 7906
+      },
+      {
+        "month": "2026-03-01",
+        "source_month": "2025-03",
+        "source_rows": 8429,
+        "generated_rows": 8978
+      }
+    ],
+    "injected_bad_rows": {
+      "duplicate_id": 3,
+      "missing_gtin": 3,
+      "bad_date": 3,
+      "negative_qty": 3
+    },
+    "real_2025_same_months": {
+      "QuantitySoldPacks": {
+        "mean": 1.189,
+        "std": 0.414,
+        "min": 1.0,
+        "max": 3.0
+      },
+      "NetSalesAmountUSD": {
+        "mean": 11.685,
+        "std": 14.196,
+        "min": 2.14,
+        "max": 364.32
+      }
+    },
+    "generated": {
+      "QuantitySoldPacks": {
+        "mean": 1.188,
+        "std": 0.465,
+        "min": 1.0,
+        "max": 4.0
+      },
+      "NetSalesAmountUSD": {
+        "mean": 11.899,
+        "std": 14.406,
+        "min": 2.2,
+        "max": 375.24
+      }
+    },
+    "net_sales_real_2025": 333992.98,
+    "net_sales_generated": 356958.19
+  },
+  "demand": {
+    "file": "06_hospital_demand_data_refresh1.csv",
+    "rows_written": 2270,
+    "per_month": [
+      {
+        "month": "2026-01-01",
+        "source_rows": 756,
+        "generated_rows": 756,
+        "consumed_packs": 189736
+      },
+      {
+        "month": "2026-02-01",
+        "source_rows": 756,
+        "generated_rows": 756,
+        "consumed_packs": 179974
+      },
+      {
+        "month": "2026-03-01",
+        "source_rows": 756,
+        "generated_rows": 756,
+        "consumed_packs": 157121
+      }
+    ],
+    "injected_bad_rows": {
+      "negative_consumed": 1,
+      "missing_hospital_id": 1
+    }
+  },
+  "scd_change": null
+}
