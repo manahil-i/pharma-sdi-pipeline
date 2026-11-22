@@ -1,6 +1,6 @@
 # Pharma Cold-Chain – Sales & Demand Intelligence (SDI) Data Mart
 
-## Group Members - IBA MS-DS KARACHI
+### Group Members - IBA MS-DS KARACHI
 Syeda Fizza Rizvi - ERP 24745
 Manahil Imran - ERP 36400
 
