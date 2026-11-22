@@ -1,8 +1,7 @@
 # Pharma Cold-Chain – Sales & Demand Intelligence (SDI) Data Mart
 
 ### Group Members - IBA MS-DS KARACHI
-Syeda Fizza Rizvi - ERP 24745
-Manahil Imran - ERP 36400
+Syeda Fizza Rizvi - ERP 24745 || Manahil Imran - ERP 36400
 
 
 Milestone 1 of the DAWH & BI project: an Airflow-orchestrated pipeline that takes the pharma cold-chain
